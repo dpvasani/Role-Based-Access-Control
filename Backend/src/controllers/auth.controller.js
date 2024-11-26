@@ -10,45 +10,107 @@ import {
 } from "../mailtrap/emails.js";
 import { User } from "../models/user.model.js";
 
+// export const signup = async (req, res) => {
+// 	const { email, password, name } = req.body;
+
+// 	try {
+// 		if (!email || !password || !name) {
+// 			throw new Error("All fields are required");
+// 		}
+
+// 		const userAlreadyExists = await User.findOne({ email });
+// 		// console.log("userAlreadyExists", userAlreadyExists);
+
+// 		if (userAlreadyExists) {
+// 			return res.status(400).json({ success: false, message: "User already exists" });
+// 		}
+
+// 		const hashedPassword = await bcryptjs.hash(password, 10);
+// 		const verificationToken = Math.floor(100000 + Math.random() * 900000).toString();
+
+// 		const user = new User({
+// 			email,
+// 			password: hashedPassword,
+// 			name,
+// 			verificationToken,
+// 			verificationTokenExpiresAt: Date.now() + 24 * 60 * 60 * 1000, // 24 hours
+// 		});
+
+// 		await user.save();
+
+// 		// jwt
+// 		generateTokenAndSetCookie(res, user._id);
+
+// 		await sendVerificationEmail(user.email, verificationToken);
+
+// 		res.status(201).json({
+// 			success: true,
+// 			message: "User created successfully",
+// 			user: {
+// 				...user._doc,
+// 				password: undefined,
+// 			},
+// 		});
+// 	} catch (error) {
+// 		res.status(400).json({ success: false, message: error.message });
+// 	}
+// };
+
 export const signup = async (req, res) => {
-	const { email, password, name } = req.body;
+	const { email, password, name, role } = req.body;
 
 	try {
-		if (!email || !password || !name) {
-			throw new Error("All fields are required");
+		// Validate required fields
+		if (!email || !password || !name || !role) {
+			throw new Error("All fields, including role, are required");
 		}
 
-		const userAlreadyExists = await User.findOne({ email });
-		// console.log("userAlreadyExists", userAlreadyExists);
+		// Validate role
+		const validRoles = ["Admin", "User", "Moderator"]; // Define valid roles
+		if (!validRoles.includes(role)) {
+			return res.status(400).json({
+				success: false,
+				message: `Invalid role. Valid roles are: ${validRoles.join(", ")}`,
+			});
+		}
 
+		// Check if the user already exists
+		const userAlreadyExists = await User.findOne({ email });
 		if (userAlreadyExists) {
 			return res.status(400).json({ success: false, message: "User already exists" });
 		}
 
+		// Hash the password
 		const hashedPassword = await bcryptjs.hash(password, 10);
+
+		// Generate a verification token
 		const verificationToken = Math.floor(100000 + Math.random() * 900000).toString();
 
+		// Create the user
 		const user = new User({
 			email,
 			password: hashedPassword,
 			name,
+			role, // Save the role
 			verificationToken,
 			verificationTokenExpiresAt: Date.now() + 24 * 60 * 60 * 1000, // 24 hours
 		});
 
 		await user.save();
 
-		// jwt
+		// Generate JWT and set it as a cookie
 		generateTokenAndSetCookie(res, user._id);
 
+		// Send verification email
 		await sendVerificationEmail(user.email, verificationToken);
 
+		// Respond with success
 		res.status(201).json({
 			success: true,
 			message: "User created successfully",
 			user: {
 				...user._doc,
-				password: undefined,
+				password: undefined, // Omit the password in the response
 			},
 		});
 	} catch (error) {
