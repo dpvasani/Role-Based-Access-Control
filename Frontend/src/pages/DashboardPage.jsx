@@ -8,6 +8,7 @@ const DashboardPage = () => {
 	const handleLogout = () => {
 		logout();
 	};
+
 	return (
 		<motion.div
 			initial={{ opacity: 0, scale: 0.9 }}
@@ -21,6 +22,7 @@ const DashboardPage = () => {
 			</h2>
 
 			<div className='space-y-6'>
+				{/* Profile Information */}
 				<motion.div
 					className='p-4 bg-gray-800 bg-opacity-50 rounded-lg border border-gray-700'
 					initial={{ opacity: 0, y: 20 }}
@@ -31,6 +33,22 @@ const DashboardPage = () => {
 					<p className='text-gray-300'>Name: {user.name}</p>
 					<p className='text-gray-300'>Email: {user.email}</p>
 				</motion.div>
+
+				{/* Role Information */}
+				<motion.div
+					className='p-4 bg-gray-800 bg-opacity-50 rounded-lg border border-gray-700'
+					initial={{ opacity: 0, y: 20 }}
+					animate={{ opacity: 1, y: 0 }}
+					transition={{ delay: 0.3 }}
+				>
+					<h3 className='text-xl font-semibold text-green-400 mb-3'>Role Information</h3>
+					<p className='text-gray-300'>
+						<span className='font-bold'>Role: </span>
+						{user.role}
+					</p>
+				</motion.div>
+
+				{/* Account Activity */}
 				<motion.div
 					className='p-4 bg-gray-800 bg-opacity-50 rounded-lg border border-gray-700'
 					initial={{ opacity: 0, y: 20 }}
@@ -48,12 +66,12 @@ const DashboardPage = () => {
 					</p>
 					<p className='text-gray-300'>
 						<span className='font-bold'>Last Login: </span>
-
 						{formatDate(user.lastLogin)}
 					</p>
 				</motion.div>
 			</div>
 
+			{/* Logout Button */}
 			<motion.div
 				initial={{ opacity: 0, y: 20 }}
 				animate={{ opacity: 1, y: 0 }}
@@ -74,4 +92,5 @@ const DashboardPage = () => {
 		</motion.div>
 	);
 };
+
 export default DashboardPage;
