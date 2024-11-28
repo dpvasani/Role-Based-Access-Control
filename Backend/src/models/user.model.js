@@ -1,5 +1,4 @@
 import mongoose from "mongoose";
-
 const userSchema = new mongoose.Schema(
 	{
 		email: {
@@ -33,6 +32,25 @@ const userSchema = new mongoose.Schema(
 		resetPasswordExpiresAt: Date,
 		verificationToken: String,
 		verificationTokenExpiresAt: Date,
+		loginHistory: [
+			{
+				timestamp: {
+					type: Date,
+					default: Date.now,
+				},
+				success: {
+					type: Boolean,
+					required: true,
+				},
+			},
+		],
+		failedLoginCount: {
+			type: Number,
+			default: 0,
+		},
+		lockUntil: {
+			type: Date,
+		},
 	},
 	{ timestamps: true }
 );

@@ -151,22 +151,87 @@ export const verifyEmail = async (req, res) => {
 	}
 };
 
+// export const login = async (req, res) => {
+// 	const { email, password } = req.body;
+// 	try {
+// 		const user = await User.findOne({ email });
+// 		if (!user) {
+// 			return res.status(400).json({ success: false, message: "Invalid credentials" });
+// 		}
+// 		const isPasswordValid = await bcryptjs.compare(password, user.password);
+// 		if (!isPasswordValid) {
+// 			return res.status(400).json({ success: false, message: "Invalid credentials" });
+// 		}
+
+// 		generateTokenAndSetCookie(res, user._id);
+
+// 		user.lastLogin = new Date();
+// 		await user.save();
+
+// 		res.status(200).json({
+// 			success: true,
+// 			message: "Logged in successfully",
+// 			user: {
+// 				...user._doc,
+// 				password: undefined,
+// 			},
+// 		});
+// 	} catch (error) {
+// 		console.log("Error in login ", error);
+// 		res.status(400).json({ success: false, message: error.message });
+// 	}
+// };
+
 export const login = async (req, res) => {
 	const { email, password } = req.body;
+
 	try {
 		const user = await User.findOne({ email });
 		if (!user) {
 			return res.status(400).json({ success: false, message: "Invalid credentials" });
 		}
+
+		// Check if the user is locked out
+		if (user.lockUntil && user.lockUntil > Date.now()) {
+			return res.status(403).json({
+				success: false,
+				message: `Account locked. Try again after ${new Date(user.lockUntil).toLocaleTimeString()}.`,
+			});
+		}
+
+		// Verify password
 		const isPasswordValid = await bcryptjs.compare(password, user.password);
+
 		if (!isPasswordValid) {
+			// Increment failed login count
+			user.failedLoginCount += 1;
+			user.loginHistory.push({ success: false });
+
+			// Lock account if failed attempts exceed 3
+			if (user.failedLoginCount >= 3) {
+				user.lockUntil = Date.now() + 15 * 60 * 1000; // 15-minute cooldown
+				user.failedLoginCount = 0; // Reset failed login count after lock
+			}
+
+			await user.save();
+
 			return res.status(400).json({ success: false, message: "Invalid credentials" });
 		}
 
-		generateTokenAndSetCookie(res, user._id);
+		// Reset failed login count on successful login
+		user.failedLoginCount = 0;
+		user.lockUntil = undefined;
 
+		// Add login attempt to history
+		user.loginHistory.push({ success: true });
+
+		// Update last login timestamp
 		user.lastLogin = new Date();
+
 		await user.save();
+
+		// Generate JWT and set it as a cookie
+		generateTokenAndSetCookie(res, user._id);
 
 		res.status(200).json({
 			success: true,
@@ -181,6 +246,7 @@ export const login = async (req, res) => {
 		res.status(400).json({ success: false, message: error.message });
 	}
 };
+
 
 export const logout = async (req, res) => {
 	res.clearCookie("token");
