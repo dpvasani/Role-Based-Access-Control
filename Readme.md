@@ -8,7 +8,6 @@ Role-Based Access Control (RBAC) is a comprehensive authentication tutorial that
 
 ## Features
 
-This tutorial covers the complete setup of an advanced authentication system, with detailed steps and endpoints:
 
 - 🔧 **Backend Setup** – Initialize backend server, database, and key configurations
 - 🗄️ **Database Setup** – Connect MongoDB and manage user data securely
