@@ -4,7 +4,7 @@
 
 ## About This Project
 
-Role-Based Access Control (RBAC) is a comprehensive authentication tutorial that provides a full-stack setup for user authentication and authorization. It includes both backend and frontend modules, covering essential functionality such as email verification, password reset, and secure session management. This project is ideal for developers looking to implement robust authentication in their applications.
+Role-Based Access Control (RBAC) is a comprehensive authentication Project that provides a full-stack setup for user authentication and authorization. It includes both backend and frontend modules, covering essential functionality such as email verification, password reset, and secure session management. This project is ideal for developers looking to implement robust authentication in their applications.
 
 ## Features
 
@@ -86,6 +86,7 @@ To build and start the app in production mode:
 npm run build
 npm start
 ```
+## More Features Coming Soon
 
 ## License
 
